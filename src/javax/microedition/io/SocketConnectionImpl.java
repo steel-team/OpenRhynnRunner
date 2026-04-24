@@ -38,7 +38,9 @@ public class SocketConnectionImpl implements SocketConnection {
         _port = port;
         connMap.put(host + ":" + port, this);
         try {
-            SocketConnectionNatives.open(host, port);
+            int res = SocketConnectionNatives.open(host, port);
+            if (res == -1)
+                throw new IOException();
         } catch (Exception ex) {
             throw new IOException();
         }

@@ -6,7 +6,7 @@ export default {
         if(host.startsWith("-")) return;
         const uri = `ws://${host}:8181/ws`;
         try {
-        return new Promise((resolve, reject) => {
+         new Promise((resolve, reject) => {
             try {
                 const ws = new WebSocket(uri);
                 
@@ -38,8 +38,10 @@ export default {
                 reject(error);
             }
         });
+        return 0;
     }catch(e) {
         console.error(e);
+        return -1;
     }
     },
     
