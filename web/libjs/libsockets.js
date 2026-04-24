@@ -116,9 +116,11 @@ export default {
         console.log(`read c1, from ${offset} to ${length}`);
         
         try {
-            await queue.waitForData(length);
+            await queue.waitForData(1);
             
-            const data = queue.dequeue(length);           
+            const data = queue.dequeue(length);       
+            console.log("pre c2");
+            console.log(data);    
             
             if (!data || data.length === 0) {
                 return -1;
