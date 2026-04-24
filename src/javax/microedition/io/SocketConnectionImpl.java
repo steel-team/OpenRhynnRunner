@@ -38,6 +38,7 @@ public class SocketConnectionImpl implements SocketConnection {
         _host = host;
         _port = port;
         connMap.put(host + ":" + port, this);
+        System.out.println("conn : " + host + ":" + port);
         try {
             int res = SocketConnectionNatives.open(host, port);
             _failure = res == -1;
