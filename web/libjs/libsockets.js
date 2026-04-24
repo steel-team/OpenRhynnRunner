@@ -113,7 +113,7 @@ export default {
             return -1;
         }
 
-        console.log("read c1");
+        console.log(`read c1 ${length}`);
         
         try {
             await queue.waitForData(length);
@@ -247,6 +247,7 @@ class DataQueue {
 
         }*/
        while(true) {
+        console.log(this.totalSize);
         if (this.hasData(length)) {
             return true;
         }
