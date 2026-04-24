@@ -63,6 +63,8 @@ export default {
     async Java_javax_microedition_io_SocketConnectionNatives_readBytes(lib, host, port, buffer, offset, length) {
         const key = `${host}:${port}`;
         const socket = activeSockets.get(key);
+        console.log("read c1");
+        console.log(socket);
 
         if (!socket || socket.readyState !== WebSocket.OPEN) {
             return -1;
@@ -113,6 +115,9 @@ export default {
     async Java_javax_microedition_io_SocketConnectionNatives_writeBytes(lib, host, port, buffer, offset, length) {
         const key = `${host}:${port}`;
         const socket = activeSockets.get(key);
+
+        console.log("write c1");
+        console.log(socket);
 
         if (!socket || socket.readyState !== WebSocket.OPEN) {
             throw new Error('Connection not open');
