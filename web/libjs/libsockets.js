@@ -1,4 +1,5 @@
 let activeSockets = new Map();
+let socketQueues = new Map();
 let currentConnection = null;
 
 export default {
@@ -16,6 +17,36 @@ export default {
                     currentConnection = ws;
                     activeSockets.set(`${host}:${port}`, ws);
                     resolve();
+                };
+
+                ws.onmessage = (event) => {
+                    // Convert incoming data to Uint8Array
+                    let data;
+                    if (event.data instanceof ArrayBuffer) {
+                        data = new Uint8Array(event.data);
+                    } else if (event.data instanceof Blob) {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            const buffer = reader.result;
+                            const queue = socketQueues.get(socketKey);
+                            if (queue) {
+                                queue.enqueue(new Uint8Array(buffer));
+                            }
+                        };
+                        reader.readAsArrayBuffer(event.data);
+                        return;
+                    } else if (typeof event.data === 'string') {
+                        const encoder = new TextEncoder();
+                        data = encoder.encode(event.data);
+                    } else {
+                        console.warn('Unknown message type:', typeof event.data);
+                        return;
+                    }
+                    
+                    const queue = socketQueues.get(socketKey);
+                    if (queue) {
+                        queue.enqueue(data);
+                    }
                 };
                 
                 ws.onerror = (error) => {
@@ -74,46 +105,31 @@ export default {
             return 0;
         }
         
-        return new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => {
-                reject(new Error('Read timeout'));
-            }, 30000);
+        const queue = socketQueues.get(socketKey);
+        if (!queue) {
+            return -1;
+        }
+        
+        try {
+            await queue.waitForData(1, 30000);
             
-            const handleMessage = (event) => {
-                socket.removeEventListener('message', handleMessage);
-                clearTimeout(timeout);
-                
-                const data = event.data;
-                let bytesToCopy;
-                
-                if (data instanceof ArrayBuffer) {
-                    bytesToCopy = new Uint8Array(data);
-                } else if (data instanceof Blob) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        bytesToCopy = new Uint8Array(reader.result);
-                        copyToJavaBuffer(bytesToCopy, buffer, offset, length, resolve);
-                    };
-                    reader.onerror = () => reject(new Error('Failed to read blob'));
-                    reader.readAsArrayBuffer(data);
-                    return;
-                } else {
-                    const encoder = new TextEncoder();
-                    bytesToCopy = encoder.encode(data);
-                }
-                
-                copyToJavaBuffer(bytesToCopy, buffer, offset, length, resolve);
-            };
+            const data = queue.dequeue(length);
             
-            socket.addEventListener('message', handleMessage);
-            
-            if (socket.readBuffer && socket.readBuffer.length > 0) {
-                socket.removeEventListener('message', handleMessage);
-                clearTimeout(timeout);
-                const bufferedData = socket.readBuffer.shift();
-                copyToJavaBuffer(bufferedData, buffer, offset, length, resolve);
+            if (!data || data.length === 0) {
+                return -1;
             }
-        });
+            
+            const bytesToCopy = Math.min(data.length, length);
+            for (let i = 0; i < bytesToCopy; i++) {
+                buffer[offset + i] = data[i];
+            }
+            
+            return bytesToCopy;
+            
+        } catch (error) {
+            console.error('Read error:', error);
+            return -1;
+        }
     },
     
     async Java_javax_microedition_io_SocketConnectionNatives_writeBytes(lib, host, port, buffer, offset, length) {
@@ -152,4 +168,119 @@ function copyToJavaBuffer(sourceBytes, javaBuffer, offset, length, resolve) {
     }
     
     resolve(bytesToCopy);
+}
+
+class DataQueue {
+    constructor() {
+        this.queue = [];
+        this.totalSize = 0;
+        this.waitingResolvers = [];
+    }
+    
+    enqueue(data) {
+        if (data && data.length > 0) {
+            this.queue.push(data);
+            this.totalSize += data.length;
+            
+            this._resolveWaiting();
+        }
+    }
+    
+    dequeue(length) {
+        if (this.queue.length === 0) {
+            return null;
+        }
+        
+        let bytesRead = 0;
+        const result = new Uint8Array(length);
+        
+        while (bytesRead < length && this.queue.length > 0) {
+            const frontChunk = this.queue[0];
+            const remainingNeeded = length - bytesRead;
+            
+            if (frontChunk.length <= remainingNeeded) {
+                result.set(frontChunk, bytesRead);
+                bytesRead += frontChunk.length;
+                this.queue.shift();
+            } else {
+                const partialChunk = frontChunk.slice(0, remainingNeeded);
+                result.set(partialChunk, bytesRead);
+                bytesRead += remainingNeeded;
+                
+                this.queue[0] = frontChunk.slice(remainingNeeded);
+            }
+        }
+        
+        this.totalSize -= bytesRead;
+        
+        return bytesRead === length ? result : result.slice(0, bytesRead);
+    }
+    
+    peek(length) {
+        if (this.queue.length === 0) {
+            return null;
+        }
+        
+        if (length === undefined) {
+            return this.totalSize;
+        }
+        
+        let bytesRead = 0;
+        const result = new Uint8Array(Math.min(length, this.totalSize));
+        
+        for (const chunk of this.queue) {
+            const chunkToCopy = Math.min(chunk.length, length - bytesRead);
+            result.set(chunk.slice(0, chunkToCopy), bytesRead);
+            bytesRead += chunkToCopy;
+            if (bytesRead >= length) break;
+        }
+        
+        return result;
+    }
+    
+    hasData(length = 1) {
+        return this.totalSize >= length;
+    }
+    
+    async waitForData(length = 1, timeout = 30000) {
+        if (this.hasData(length)) {
+            return true;
+        }
+        
+        return new Promise((resolve, reject) => {
+            const timeoutId = setTimeout(() => {
+                const index = this.waitingResolvers.indexOf(resolve);
+                if (index !== -1) {
+                    this.waitingResolvers.splice(index, 1);
+                }
+                reject(new Error(`Read timeout after ${timeout}ms`));
+            }, timeout);
+            
+            this.waitingResolvers.push(() => {
+                clearTimeout(timeoutId);
+                resolve(true);
+            });
+            
+            if (this.hasData(length)) {
+                this._resolveWaiting();
+            }
+        });
+    }
+    
+    _resolveWaiting() {
+        while (this.waitingResolvers.length > 0) {
+            const resolver = this.waitingResolvers.shift();
+            resolver();
+        }
+    }
+    
+    size() {
+        return this.totalSize;
+    }
+    
+    clear() {
+        this.queue = [];
+        this.totalSize = 0;
+        this.waitingResolvers = [];
+    }
 }
