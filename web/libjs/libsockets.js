@@ -128,7 +128,7 @@ export default {
             
             console.log(`read c2, req len = ${length}, cur len: ${data.length}`)             
             const bytesToCopy = Math.min(data.length, length);
-            onsole.log(bytesToCopy);
+            console.log(bytesToCopy);
             for (let i = 0; i < bytesToCopy; i++) {
                 buffer[offset + i] = data[i];
             }
