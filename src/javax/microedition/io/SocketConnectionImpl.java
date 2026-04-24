@@ -192,13 +192,13 @@ public class SocketConnectionImpl implements SocketConnection {
 
     public DataInputStream openDataInputStream() throws IOException {
         if (_failure)
-            throw new IOException();
+            return null;
         return new DataInputStream(new NetworkInputStream(_host, _port));
     }
 
     public DataOutputStream openDataOutputStream() throws IOException {
         if (_failure)
-            throw new IOException();
+            return null;
         return new DataOutputStream(new NetworkOutputStream(_host, _port));
     }
 
