@@ -170,9 +170,10 @@ public class SocketConnectionImpl implements SocketConnection {
     }
 
     public void close() throws IOException {
-        // TODO fix differences between Java ME and Java SE
-
         SocketConnectionNatives.close(_host, _port);
+        if (connMap.containsKey(_host + ":" + _port)) {
+            connMap.remove(_host + ":" + _port);
+        }
     }
 
     public InputStream openInputStream() throws IOException {
@@ -181,18 +182,105 @@ public class SocketConnectionImpl implements SocketConnection {
         // return socket.getInputStream();
     }
 
-    public DataInputStream openDataInputStream() throws IOException {
-        return new DataInputStream(openInputStream());
-    }
-
     public OutputStream openOutputStream() throws IOException {
         throw new IOException();
         // TO-DO
         // return socket.getOutputStream();
     }
 
+    public DataInputStream openDataInputStream() throws IOException {
+        return new DataInputStream(new NetworkInputStream(_host, _port));
+    }
+
     public DataOutputStream openDataOutputStream() throws IOException {
-        return new DataOutputStream(openOutputStream());
+        return new DataOutputStream(new NetworkOutputStream(_host, _port));
+    }
+
+    // custom streams
+    private static class NetworkInputStream extends InputStream {
+
+        private String _host;
+        private int _port;
+
+        public NetworkInputStream(String host, int port) {
+            _host = host;
+            _port = port;
+        }
+
+        @Override
+        public int read() throws IOException {
+            byte[] buf = new byte[1];
+            int result = SocketConnectionNatives.readBytes(_host, _port, buf, 0, 1);
+            if (result <= 0) {
+                return -1;
+            }
+            return buf[0] & 0xFF;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            if (b == null) {
+                throw new NullPointerException();
+            }
+            if (off < 0 || len < 0 || len > b.length - off) {
+                throw new IndexOutOfBoundsException();
+            }
+            if (len == 0) {
+                return 0;
+            }
+            return SocketConnectionNatives.readBytes(_host, _port, b, off, len);
+        }
+
+        @Override
+        public int available() throws IOException {
+            return SocketConnectionNatives.available(_host, _port);
+        }
+
+        @Override
+        public void close() throws IOException {
+            // Connection close handled separately
+        }
+    }
+
+    // Custom OutputStream implementation
+    private static class NetworkOutputStream extends OutputStream {
+        private String _host;
+        private int _port;
+
+        public NetworkOutputStream(String host, int port) {
+            _host = host;
+            _port = port;
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            byte[] buf = new byte[] { (byte) (b & 0xFF) };
+            SocketConnectionNatives.writeBytes(_host, _port, buf, 0, 1);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            if (b == null) {
+                throw new NullPointerException();
+            }
+            if (off < 0 || len < 0 || len > b.length - off) {
+                throw new IndexOutOfBoundsException();
+            }
+            if (len == 0) {
+                return;
+            }
+            SocketConnectionNatives.writeBytes(_host, _port, b, off, len);
+        }
+
+        @Override
+        public void flush() throws IOException {
+            // No buffering in this implementation
+        }
+
+        @Override
+        public void close() throws IOException {
+            // Connection close handled separately
+        }
     }
 
 }
