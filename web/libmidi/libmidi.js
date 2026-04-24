@@ -180,44 +180,88 @@ export class MIDIPlayer extends EventTarget {
     }
 
     async setSequence(buffer) {
-        const { duration } = await this.send({cmd: "setSequence", buffer}); //hmm, no transfer.. we're not sure
-        console.log('duration', duration);
-        this.duration = duration;
+        try {
+            const { duration } = await this.send({cmd: "setSequence", buffer}); //hmm, no transfer.. we're not sure
+            console.log('duration', duration);
+            this.duration = duration;
+        }
+        catch {
+
+        }
 
     }
 
     play() {
-        this.send({cmd: "play"});
+        try {
+            this.send({cmd: "play"});
+        }
+        catch {
+
+        }
     }
 
     loop(times) {
-        this.send({cmd: "loop", times});
+        try {
+            this.send({cmd: "loop", times});
+        }
+        catch {
+
+        }
     }
 
     stop() {
-        this.send({cmd: "stop"});
+        try {
+            this.send({cmd: "stop"});
+        }
+        catch {
+
+        }
     }
 
     shortEvent(status, data1, data2) {
-        this.send({cmd: "shortEvent", status, data1, data2});
+        try {
+            this.send({cmd: "shortEvent", status, data1, data2});
+        }
+        catch {
+
+        }
     }
 
     // async
     getPosition() {
-        return this.send({cmd: "getPosition"});
+        try {
+            return this.send({cmd: "getPosition"});
+        }
+        catch {
+
+        }
     }
 
     seek(pos) {
-        return this.send({cmd: "seek", pos});
+        try {
+            return this.send({cmd: "seek", pos});
+        }
+        catch {
+        }
     }
 
     close() {
-        MIDIPlayer._unregister([this.client, this.node, this.gainNode]);
-        MIDIPlayer._finalizer.unregister(this);
+        try {
+            MIDIPlayer._unregister([this.client, this.node, this.gainNode]);
+            MIDIPlayer._finalizer.unregister(this);
+        }
+        catch {
+
+        }
     }
 
     get volume() {
-        return this.gainNode.gain.value;
+        try {
+            return this.gainNode.gain.value;
+        }
+        catch {
+            return 0;
+        }
     }
 
     set volume(v) {
