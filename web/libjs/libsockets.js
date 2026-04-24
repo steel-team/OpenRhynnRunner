@@ -5,6 +5,7 @@ export default {
     async Java_javax_microedition_io_SocketConnectionNatives_open(lib, host, port) {
         if(host.startsWith("-")) return;
         const uri = `ws://${host}:8181/ws`;
+        try {
         return new Promise((resolve, reject) => {
             try {
                 const ws = new WebSocket(uri);
@@ -36,6 +37,9 @@ export default {
                 reject(error);
             }
         });
+    }catch(e) {
+        console.error(e);
+    }
     },
     
     async Java_javax_microedition_io_SocketConnectionNatives_close(lib, host, port) {
@@ -122,7 +126,7 @@ export default {
     async Java_javax_microedition_io_SocketConnectionNatives_available(lib, host, port) {
         const key = `${host}:${port}`;
         const socket = activeSockets.get(key);
-        
+
         if (!socket || socket.readyState !== WebSocket.OPEN) {
             return 0;
         }
