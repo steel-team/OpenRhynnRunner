@@ -7,7 +7,8 @@ export default {
     async Java_javax_microedition_io_SocketConnectionNatives_open(lib, host, port) {
         if(host.startsWith("-")) return -1;
         if(host.startsWith("true")) return -1;
-        const uri = `ws://${host}:8181/ws`;
+        //const uri = `ws://${host}:8181/ws`;
+        const uri = "ws://server2.openrhynn.net:8181/ws"; // force specific server due to OR client bug.
         const socketKey = `${host}:${port}`;
         try {
          new Promise((resolve, reject) => {
