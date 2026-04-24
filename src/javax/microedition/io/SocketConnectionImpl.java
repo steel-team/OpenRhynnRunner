@@ -21,144 +21,164 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
+import java.util.HashMap;
 
 public class SocketConnectionImpl implements SocketConnection {
 
-    protected Socket socket;
+    // protected Socket socket;
+    private String _host;
+    private int _port;
+    public static HashMap<String, SocketConnectionImpl> connMap = new HashMap<String, SocketConnectionImpl>();
 
     public SocketConnectionImpl() {
     }
 
     public SocketConnectionImpl(String host, int port) throws IOException {
-        this.socket = new Socket(host, port);
-    }
-
-    public SocketConnectionImpl(Socket socket) {
-        this.socket = socket;
+        _host = host;
+        _port = port;
+        connMap.put(host + ":" + port, this);
+        SocketConnectionNatives.open(host, port);
     }
 
     public String getAddress() throws IOException {
-        if (socket == null || socket.isClosed()) {
-            throw new IOException();
-        }
+        /*
+         * if (socket == null || socket.isClosed()) {
+         * throw new IOException();
+         * }
+         */
 
-        return socket.getInetAddress().toString();
+        return "127.0.0.1";// socket.getInetAddress().toString();
     }
 
     public String getLocalAddress() throws IOException {
-        if (socket == null || socket.isClosed()) {
-            throw new IOException();
-        }
-
-        return socket.getLocalAddress().toString();
+        /*
+         * if (socket == null || socket.isClosed()) {
+         * throw new IOException();
+         * }
+         * 
+         * return socket.getLocalAddress().toString();
+         */
+        return "127.0.0.1";
     }
 
     public int getLocalPort() throws IOException {
-        if (socket == null || socket.isClosed()) {
-            throw new IOException();
-        }
-
-        return socket.getLocalPort();
+        /*
+         * if (socket == null || socket.isClosed()) {
+         * throw new IOException();
+         * }
+         * 
+         * return socket.getLocalPort();
+         */
+        return 1;
     }
 
     public int getPort() throws IOException {
-        if (socket == null || socket.isClosed()) {
-            throw new IOException();
-        }
-
-        return socket.getPort();
+        /*
+         * if (socket == null || socket.isClosed()) {
+         * throw new IOException();
+         * }
+         * 
+         * return socket.getPort();
+         */
+        return _port;
     }
 
     public int getSocketOption(byte option) throws IllegalArgumentException,
             IOException {
-        if (socket != null && socket.isClosed()) {
-            throw new IOException();
-        }
-        switch (option) {
-            case DELAY:
-                if (socket.getTcpNoDelay()) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            case LINGER:
-                int value = socket.getSoLinger();
-                if (value == -1) {
-                    return 0;
-                } else {
-                    return value;
-                }
-            case KEEPALIVE:
-                if (socket.getKeepAlive()) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            case RCVBUF:
-                return socket.getReceiveBufferSize();
-            case SNDBUF:
-                return socket.getSendBufferSize();
-            default:
-                throw new IllegalArgumentException();
-        }
+        /*
+         * if (socket != null && socket.isClosed()) {
+         * throw new IOException();
+         * }
+         * switch (option) {
+         * case DELAY:
+         * if (socket.getTcpNoDelay()) {
+         * return 1;
+         * } else {
+         * return 0;
+         * }
+         * case LINGER:
+         * int value = socket.getSoLinger();
+         * if (value == -1) {
+         * return 0;
+         * } else {
+         * return value;
+         * }
+         * case KEEPALIVE:
+         * if (socket.getKeepAlive()) {
+         * return 1;
+         * } else {
+         * return 0;
+         * }
+         * case RCVBUF:
+         * return socket.getReceiveBufferSize();
+         * case SNDBUF:
+         * return socket.getSendBufferSize();
+         * default:
+         * throw new IllegalArgumentException();
+         * }
+         */
+        return 0;
     }
 
     public void setSocketOption(byte option, int value)
             throws IllegalArgumentException, IOException {
-        if (socket.isClosed()) {
-            throw new IOException();
-        }
-        switch (option) {
-            case DELAY:
-                int delay;
-                if (value == 0) {
-                    delay = 0;
-                } else {
-                    delay = 1;
-                }
-                socket.setTcpNoDelay(delay == 0 ? false : true);
-                break;
-            case LINGER:
-                if (value < 0) {
-                    throw new IllegalArgumentException();
-                }
-                socket.setSoLinger(value == 0 ? false : true, value);
-                break;
-            case KEEPALIVE:
-                int keepalive;
-                if (value == 0) {
-                    keepalive = 0;
-                } else {
-                    keepalive = 1;
-                }
-                socket.setKeepAlive(keepalive == 0 ? false : true);
-                break;
-            case RCVBUF:
-                if (value <= 0) {
-                    throw new IllegalArgumentException();
-                }
-                socket.setReceiveBufferSize(value);
-                break;
-            case SNDBUF:
-                if (value <= 0) {
-                    throw new IllegalArgumentException();
-                }
-                socket.setSendBufferSize(value);
-                break;
-            default:
-                throw new IllegalArgumentException();
-        }
+        /*
+         * if (socket.isClosed()) {
+         * throw new IOException();
+         * }
+         * switch (option) {
+         * case DELAY:
+         * int delay;
+         * if (value == 0) {
+         * delay = 0;
+         * } else {
+         * delay = 1;
+         * }
+         * socket.setTcpNoDelay(delay == 0 ? false : true);
+         * break;
+         * case LINGER:
+         * if (value < 0) {
+         * throw new IllegalArgumentException();
+         * }
+         * socket.setSoLinger(value == 0 ? false : true, value);
+         * break;
+         * case KEEPALIVE:
+         * int keepalive;
+         * if (value == 0) {
+         * keepalive = 0;
+         * } else {
+         * keepalive = 1;
+         * }
+         * socket.setKeepAlive(keepalive == 0 ? false : true);
+         * break;
+         * case RCVBUF:
+         * if (value <= 0) {
+         * throw new IllegalArgumentException();
+         * }
+         * socket.setReceiveBufferSize(value);
+         * break;
+         * case SNDBUF:
+         * if (value <= 0) {
+         * throw new IllegalArgumentException();
+         * }
+         * socket.setSendBufferSize(value);
+         * break;
+         * default:
+         * throw new IllegalArgumentException();
+         * }
+         */
     }
 
     public void close() throws IOException {
         // TODO fix differences between Java ME and Java SE
 
-        socket.close();
+        SocketConnectionNatives.close(_host, _port);
     }
 
     public InputStream openInputStream() throws IOException {
-        return socket.getInputStream();
+        throw new IOException();
+        // TO-DO
+        // return socket.getInputStream();
     }
 
     public DataInputStream openDataInputStream() throws IOException {
@@ -166,7 +186,9 @@ public class SocketConnectionImpl implements SocketConnection {
     }
 
     public OutputStream openOutputStream() throws IOException {
-        return socket.getOutputStream();
+        throw new IOException();
+        // TO-DO
+        // return socket.getOutputStream();
     }
 
     public DataOutputStream openDataOutputStream() throws IOException {
