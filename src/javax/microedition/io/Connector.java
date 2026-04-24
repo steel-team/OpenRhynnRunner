@@ -27,77 +27,108 @@ import java.io.IOException;
 
 import org.recompile.mobile.Mobile;
 
-public class Connector
-{
+public class Connector {
 
 	public static final int READ = 1;
 	public static final int READ_WRITE = 3;
 	public static final int WRITE = 2;
 
-	
-	public static InputStream openInputStream(String name)
-	{
-		//System.out.println("Connector: " + name);
-		if(name.startsWith("resource:")) // older Siemens phones?
+	public static InputStream openInputStream(String name) {
+		// System.out.println("Connector: " + name);
+		if (name.startsWith("resource:")) // older Siemens phones?
 		{
-			return Mobile.getPlatform().loader.getMIDletResourceAsSiemensStream(name.substring(9).replaceAll("\\\\", "/"));
-		}
-		else
-		{
-			//return Mobile.getPlatform().loader.getMIDletResourceAsStream(name); // possible
-			System.out.println("Faked InputStream for "+name); // just in case //
+			return Mobile.getPlatform().loader
+					.getMIDletResourceAsSiemensStream(name.substring(9).replaceAll("\\\\", "/"));
+		} else {
+			// return Mobile.getPlatform().loader.getMIDletResourceAsStream(name); //
+			// possible
+			System.out.println("Faked InputStream for " + name); // just in case //
 			return new fakeIS();
 		}
 	}
 
-
-	public static DataInputStream openDataInputStream(String name)
-	{
-		System.out.println("Faked DataInputStream: "+name);
+	public static DataInputStream openDataInputStream(String name) {
+		System.out.println("Faked DataInputStream: " + name);
 		return new DataInputStream(new fakeIS());
 	}
 
-	private static class DummyOutputStream extends OutputStream
-	{
-		public void write(int a) {}
+	private static class DummyOutputStream extends OutputStream {
+		public void write(int a) {
+		}
 	}
 
-	public static Connection open(String name) throws IOException { 
+	public static Connection open(String name) throws IOException {
 		if (name != null && name.startsWith("sms://")) {
 			return new MessageConnectionImpl(name);
+		} else if (name != null && name.startsWith("socket://")) {
+			return openSocketConnection(name);
 		} else {
 			throw new ConnectionNotFoundException();
 		}
 	}
 
-	public static Connection open(String name, int mode) throws IOException { return open(name); }
+	public static Connection openSocketConnection(String name) throws IOException {
+		int portSepIndex = name.lastIndexOf(':');
+		int port = Integer.parseInt(name.substring(portSepIndex + 1));
+		String host = name.substring("socket://".length(), portSepIndex);
 
-	public static Connection open(String name, int mode, boolean timeouts) throws IOException { return open(name); }
+		if (!host.isEmpty()) {
+			return new SocketConnectionImpl(host, port);
+		} else {
+			throw new ConnectionNotFoundException();
+		}
+	}
 
-	public static DataOutputStream openDataOutputStream(String name) { return new DataOutputStream(new DummyOutputStream()); }
+	public static Connection open(String name, int mode) throws IOException {
+		return open(name);
+	}
 
-	public static OutputStream openOutputStream(String name) { return new DummyOutputStream(); }
+	public static Connection open(String name, int mode, boolean timeouts) throws IOException {
+		return open(name);
+	}
 
-	// fake inputstream 
-	private static class fakeIS extends InputStream
-	{
-		public int avaliable() { return 0; }
+	public static DataOutputStream openDataOutputStream(String name) {
+		return new DataOutputStream(new DummyOutputStream());
+	}
 
-		public void close() { }
+	public static OutputStream openOutputStream(String name) {
+		return new DummyOutputStream();
+	}
 
-		public void mark() { }
+	// fake inputstream
+	private static class fakeIS extends InputStream {
+		public int avaliable() {
+			return 0;
+		}
 
-		public boolean markSupported() { return false; }
+		public void close() {
+		}
 
-		public int read() { return 0; }
+		public void mark() {
+		}
 
-		public int read(byte[] b) { return 0; }
-		
-		public int read(byte[] b, int off, int len) { return 0; }
+		public boolean markSupported() {
+			return false;
+		}
 
-		public void reset() { }
+		public int read() {
+			return 0;
+		}
 
-		public long skip(long n) { return (long)0; }
+		public int read(byte[] b) {
+			return 0;
+		}
+
+		public int read(byte[] b, int off, int len) {
+			return 0;
+		}
+
+		public void reset() {
+		}
+
+		public long skip(long n) {
+			return (long) 0;
+		}
 	}
 
 }
