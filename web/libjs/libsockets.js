@@ -3,7 +3,8 @@ let currentConnection = null;
 
 export default {
     async Java_javax_microedition_io_SocketConnectionNatives_open(lib, host, port) {
-        if(host.startsWith("-")) return;
+        if(host.startsWith("-")) return -1;
+        if(host.startsWith("true")) return -1;
         const uri = `ws://${host}:8181/ws`;
         try {
          new Promise((resolve, reject) => {
