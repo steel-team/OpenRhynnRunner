@@ -217,6 +217,8 @@ public class SocketConnectionImpl implements SocketConnection {
         public int read() throws IOException {
             byte[] buf = new byte[1];
             int result = SocketConnectionNatives.readBytes(_host, _port, buf, 0, 1);
+            System.out.println("read-java-1");
+            System.out.println("read: " + buf[0]);
             if (result <= 0) {
                 return -1;
             }
@@ -234,7 +236,10 @@ public class SocketConnectionImpl implements SocketConnection {
             if (len == 0) {
                 return 0;
             }
-            return SocketConnectionNatives.readBytes(_host, _port, b, off, len);
+            int res = SocketConnectionNatives.readBytes(_host, _port, b, off, len);
+            System.out.println("read-java-2");
+            System.out.println("read: " + b[0]);
+            return res;
         }
 
         @Override

@@ -1,6 +1,7 @@
 let activeSockets = new Map();
 let socketQueues = new Map();
 let currentConnection = null;
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export default {
     async Java_javax_microedition_io_SocketConnectionNatives_open(lib, host, port) {
@@ -115,7 +116,7 @@ export default {
         console.log("read c1");
         
         try {
-            await queue.waitForData(1, 30000);
+            await queue.waitForData(1);
             
             const data = queue.dequeue(length);
             console.log(data);
@@ -237,36 +238,21 @@ class DataQueue {
         return this.totalSize >= length;
     }
     
-    async waitForData(length = 1, timeout = 30000) {
+    async waitForData(length = 1) {
         if (this.hasData(length)) {
             return true;
         }
-        
-        return new Promise((resolve, reject) => {
-            const timeoutId = setTimeout(() => {
-                const index = this.waitingResolvers.indexOf(resolve);
-                if (index !== -1) {
-                    this.waitingResolvers.splice(index, 1);
-                }
-                reject(new Error(`Read timeout after ${timeout}ms`));
-            }, timeout);
-            
-            this.waitingResolvers.push(() => {
-                clearTimeout(timeoutId);
-                resolve(true);
-            });
-            
-            if (this.hasData(length)) {
-                this._resolveWaiting();
-            }
-        });
-    }
-    
-    _resolveWaiting() {
-        while (this.waitingResolvers.length > 0) {
-            const resolver = this.waitingResolvers.shift();
-            resolver();
+
+        /*let trier = 0;
+        for(let i = 0; i < 300; i++) {
+
+        }*/
+       while(true) {
+        if (this.hasData(length)) {
+            return true;
         }
+        await sleep(16);
+       }
     }
     
     size() {
