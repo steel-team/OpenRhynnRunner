@@ -116,16 +116,17 @@ export default {
         console.log("read c1");
         
         try {
-            await queue.waitForData(1);
+            await queue.waitForData(length);
             
-            const data = queue.dequeue(length);
-            console.log(data);
+            const data = queue.dequeue(length);           
             
             if (!data || data.length === 0) {
                 return -1;
             }
             
+            console.log(`read c2, req len = ${length}, cur len: ${data.length}`)             
             const bytesToCopy = Math.min(data.length, length);
+            onsole.log(bytesToCopy);
             for (let i = 0; i < bytesToCopy; i++) {
                 buffer[offset + i] = data[i];
             }
