@@ -19,7 +19,8 @@ export default {
                 
                 ws.onerror = (error) => {
                     console.error('WebSocket error:', error);
-                    reject(new Error(`Connection failed: ${error.message}`));
+                    //reject(new Error(`Connection failed: ${error.message}`));
+                    resolve();
                 };
                 
                 ws.onclose = () => {
