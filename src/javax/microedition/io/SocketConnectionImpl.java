@@ -177,15 +177,11 @@ public class SocketConnectionImpl implements SocketConnection {
     }
 
     public InputStream openInputStream() throws IOException {
-        throw new IOException();
-        // TO-DO
-        // return socket.getInputStream();
+        return new NetworkInputStream(_host, _port);
     }
 
     public OutputStream openOutputStream() throws IOException {
-        throw new IOException();
-        // TO-DO
-        // return socket.getOutputStream();
+        return new NetworkOutputStream(_host, _port);
     }
 
     public DataInputStream openDataInputStream() throws IOException {
