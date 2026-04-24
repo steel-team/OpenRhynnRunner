@@ -29,6 +29,7 @@ public class SocketConnectionImpl implements SocketConnection {
     private String _host;
     private int _port;
     public static HashMap<String, SocketConnectionImpl> connMap = new HashMap<String, SocketConnectionImpl>();
+    private boolean _failure = false;
 
     public SocketConnectionImpl() {
     }
@@ -39,8 +40,7 @@ public class SocketConnectionImpl implements SocketConnection {
         connMap.put(host + ":" + port, this);
         try {
             int res = SocketConnectionNatives.open(host, port);
-            if (res == -1)
-                throw new IOException();
+            _failure = res == -1;
         } catch (Exception ex) {
             throw new IOException();
         }
@@ -191,10 +191,14 @@ public class SocketConnectionImpl implements SocketConnection {
     }
 
     public DataInputStream openDataInputStream() throws IOException {
+        if (_failure)
+            throw new IOException();
         return new DataInputStream(new NetworkInputStream(_host, _port));
     }
 
     public DataOutputStream openDataOutputStream() throws IOException {
+        if (_failure)
+            throw new IOException();
         return new DataOutputStream(new NetworkOutputStream(_host, _port));
     }
 
