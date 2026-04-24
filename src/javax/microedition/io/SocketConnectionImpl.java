@@ -236,6 +236,7 @@ public class SocketConnectionImpl implements SocketConnection {
             if (len == 0) {
                 return 0;
             }
+            System.out.println("read-java-pre = " + len + " offs = " + off);
             int res = SocketConnectionNatives.readBytes(_host, _port, b, off, len);
             System.out.println("read-java-2");
             System.out.println("read: " + b[0]);

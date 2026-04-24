@@ -113,7 +113,7 @@ export default {
             return -1;
         }
 
-        console.log(`read c1 ${length}`);
+        console.log(`read c1, from ${offset} to ${length}`);
         
         try {
             await queue.waitForData(length);
