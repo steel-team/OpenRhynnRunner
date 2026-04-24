@@ -221,7 +221,8 @@ export class MIDIPlayer extends EventTarget {
     }
 
     set volume(v) {
-        this.gainNode.gain.value = v;
+        if(this.gainNode != null)
+            this.gainNode.gain.value = v;
     }
 
 }
