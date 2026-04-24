@@ -236,7 +236,8 @@ async function init() {
     // clear db, it's broken with openrhynn...
     const databases = await indexedDB.databases(); // Get list of all DBs
     databases.forEach(db => {
-        indexedDB.deleteDatabase(db.name);
+        if(db.name.indexOf("OpenRhynn") !== -1)
+            indexedDB.deleteDatabase(db.name);
     });
 
     document.getElementById("loading").textContent = "Loading CheerpJ...";
