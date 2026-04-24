@@ -176,9 +176,7 @@ class DataQueue {
     enqueue(data) {
         if (data && data.length > 0) {
             this.queue.push(data);
-            this.totalSize += data.length;
-            
-            this._resolveWaiting();
+            this.totalSize += data.length;            
         }
     }
     
