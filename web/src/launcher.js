@@ -13,6 +13,11 @@ let state = {
 let defaultSettings = {};
 
 async function main() {
+    const databases = await indexedDB.databases(); // Get list of all DBs
+    databases.forEach(db => {
+        indexedDB.deleteDatabase(db.name);
+    });
+
     document.getElementById("loading").textContent = "Loading CheerpJ...";
     await cheerpjInit({
         enableDebug: false
@@ -344,9 +349,9 @@ async function setupAddManageGame(app, isAdding) {
 
         document.getElementById("wipe-data-btn").disabled = false;
         document.getElementById("wipe-data-btn").onclick = (e) => {
-            if (!confirm("Do you want wipe " + app.name + " rms storage?")) {
+            /*if (!confirm("Do you want wipe " + app.name + " rms storage?")) {
                 return;
-            }
+            }*/
 
             document.getElementById("wipe-data-btn").disabled = true;
             doWipeData(app.appId);
