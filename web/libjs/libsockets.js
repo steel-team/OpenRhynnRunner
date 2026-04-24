@@ -7,21 +7,25 @@ export default {
         if(host.startsWith("-")) return -1;
         if(host.startsWith("true")) return -1;
         const uri = `ws://${host}:8181/ws`;
+        const socketKey = `${host}:${port}`;
         try {
          new Promise((resolve, reject) => {
             try {
                 const ws = new WebSocket(uri);
+
+                const dataQueue = new DataQueue();
+                socketQueues.set(socketKey, dataQueue);
+
+                ws.binaryType = 'arraybuffer';
                 
                 ws.onopen = () => {
                     console.log(`Connected to ${host}:${port}`);
                     currentConnection = ws;
-                    activeSockets.set(`${host}:${port}`, ws);
+                    activeSockets.set(socketKey, ws);
                     resolve();
                 };
 
                 ws.onmessage = (event) => {
-                    // Convert incoming data to Uint8Array
-                    const socketKey = `${host}:${port}`;
                     let data;
                     if (event.data instanceof ArrayBuffer) {
                         data = new Uint8Array(event.data);
@@ -97,10 +101,7 @@ export default {
     
     async Java_javax_microedition_io_SocketConnectionNatives_readBytes(lib, host, port, buffer, offset, length) {
         const key = `${host}:${port}`;
-        console.log(key);
         const socket = activeSockets.get(key);
-        console.log("read c1");
-        console.log(socket);
 
         if (!socket || socket.readyState !== WebSocket.OPEN) {
             return 0;
@@ -110,6 +111,9 @@ export default {
         if (!queue) {
             return -1;
         }
+
+        console.log("read c1");
+        console.log(socket);
         
         try {
             await queue.waitForData(1, 30000);
@@ -160,16 +164,6 @@ export default {
             socket.readBuffer.reduce((sum, buf) => sum + buf.length, 0) : 0;
     }
 };
-
-function copyToJavaBuffer(sourceBytes, javaBuffer, offset, length, resolve) {
-    const bytesToCopy = Math.min(sourceBytes.length, length);
-    
-    for (let i = 0; i < bytesToCopy; i++) {
-        javaBuffer[offset + i] = sourceBytes[i];
-    }
-    
-    resolve(bytesToCopy);
-}
 
 class DataQueue {
     constructor() {
