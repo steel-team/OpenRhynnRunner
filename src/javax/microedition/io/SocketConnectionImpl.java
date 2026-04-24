@@ -255,7 +255,9 @@ public class SocketConnectionImpl implements SocketConnection {
         @Override
         public void write(int b) throws IOException {
             byte[] buf = new byte[] { (byte) (b & 0xFF) };
-            SocketConnectionNatives.writeBytes(_host, _port, buf, 0, 1);
+            int res = SocketConnectionNatives.writeBytes(_host, _port, buf, 0, 1);
+            if (res == -1)
+                throw new IOException();
         }
 
         @Override
@@ -269,7 +271,10 @@ public class SocketConnectionImpl implements SocketConnection {
             if (len == 0) {
                 return;
             }
-            SocketConnectionNatives.writeBytes(_host, _port, b, off, len);
+
+            int res = SocketConnectionNatives.writeBytes(_host, _port, b, off, len);
+            if (res == -1)
+                throw new IOException();
         }
 
         @Override

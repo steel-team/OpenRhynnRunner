@@ -120,13 +120,14 @@ export default {
         console.log(socket);
 
         if (!socket || socket.readyState !== WebSocket.OPEN) {
-            throw new Error('Connection not open');
+            return -1;
         }
         
         const javaBytes = new Uint8Array(buffer);
         const bytesToSend = javaBytes.slice(offset, offset + length);
         
         socket.send(bytesToSend.buffer);
+        return 0;
     },
     
     async Java_javax_microedition_io_SocketConnectionNatives_available(lib, host, port) {
