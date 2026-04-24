@@ -11,7 +11,7 @@ export default {
         const uri = "ws://server2.openrhynn.net:8181/ws"; // force specific server due to OR client bug.
         const socketKey = `${host}:${port}`;
         try {
-         new Promise((resolve, reject) => {
+         await new Promise((resolve, reject) => {
             try {
                 const ws = new WebSocket(uri);
 
