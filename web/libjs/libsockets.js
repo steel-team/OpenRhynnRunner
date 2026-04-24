@@ -113,12 +113,12 @@ export default {
         }
 
         console.log("read c1");
-        console.log(socket);
         
         try {
             await queue.waitForData(1, 30000);
             
             const data = queue.dequeue(length);
+            console.log(data);
             
             if (!data || data.length === 0) {
                 return -1;
