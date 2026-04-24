@@ -113,23 +113,17 @@ export default {
         if (!queue) {
             return -1;
         }
-
-        console.log(`read c1, from ${offset} to ${length}`);
         
         try {
             await queue.waitForData(1);
             
             const data = queue.dequeue(length);       
-            console.log("pre c2");
-            console.log(data);    
             
             if (!data || data.length === 0) {
                 return -1;
             }
-            
-            console.log(`read c2, req len = ${length}, cur len: ${data.length}`)             
+                        
             const bytesToCopy = Math.min(data.length, length);
-            console.log(bytesToCopy);
             for (let i = 0; i < bytesToCopy; i++) {
                 buffer[offset + i] = data[i];
             }
@@ -250,11 +244,10 @@ class DataQueue {
 
         }*/
        while(true) {
-        console.log(this.totalSize);
         if (this.hasData(length)) {
             return true;
         }
-        await sleep(16);
+        await sleep(5);
        }
     }
     

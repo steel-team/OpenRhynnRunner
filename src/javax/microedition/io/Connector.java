@@ -68,7 +68,6 @@ public class Connector {
 	}
 
 	public static Connection openSocketConnection(String name) throws IOException {
-		System.out.println(name);
 		int portSepIndex = name.lastIndexOf(':');
 		int port = Integer.parseInt(name.substring(portSepIndex + 1));
 		String host = name.substring("socket://".length(), portSepIndex);

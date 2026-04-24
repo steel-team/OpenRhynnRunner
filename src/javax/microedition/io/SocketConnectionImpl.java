@@ -38,7 +38,6 @@ public class SocketConnectionImpl implements SocketConnection {
         _host = host;
         _port = port;
         connMap.put(host + ":" + port, this);
-        System.out.println("conn : " + host + ":" + port);
         try {
             int res = SocketConnectionNatives.open(host, port);
             _failure = res == -1;
@@ -218,8 +217,6 @@ public class SocketConnectionImpl implements SocketConnection {
         public int read() throws IOException {
             byte[] buf = new byte[1];
             int result = SocketConnectionNatives.readBytes(_host, _port, buf, 0, 1);
-            System.out.println("read-java-1");
-            System.out.println("read: " + buf[0]);
             if (result <= 0) {
                 return -1;
             }
@@ -237,10 +234,7 @@ public class SocketConnectionImpl implements SocketConnection {
             if (len == 0) {
                 return 0;
             }
-            System.out.println("read-java-pre = " + len + " offs = " + off);
             int res = SocketConnectionNatives.readBytes(_host, _port, b, off, len);
-            System.out.println("read-java-2");
-            System.out.println("read: " + b[0]);
             return res;
         }
 
