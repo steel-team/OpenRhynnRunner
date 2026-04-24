@@ -37,7 +37,11 @@ public class SocketConnectionImpl implements SocketConnection {
         _host = host;
         _port = port;
         connMap.put(host + ":" + port, this);
-        SocketConnectionNatives.open(host, port);
+        try {
+            SocketConnectionNatives.open(host, port);
+        } catch (Exception ex) {
+            throw new IOException();
+        }
     }
 
     public String getAddress() throws IOException {
