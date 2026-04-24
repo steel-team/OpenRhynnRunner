@@ -71,7 +71,7 @@ export default {
         console.log(socket);
 
         if (!socket || socket.readyState !== WebSocket.OPEN) {
-            return -1;
+            return 0;
         }
         
         return new Promise((resolve, reject) => {
