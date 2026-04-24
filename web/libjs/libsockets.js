@@ -21,6 +21,7 @@ export default {
 
                 ws.onmessage = (event) => {
                     // Convert incoming data to Uint8Array
+                    const socketKey = `${host}:${port}`;
                     let data;
                     if (event.data instanceof ArrayBuffer) {
                         data = new Uint8Array(event.data);
@@ -105,7 +106,7 @@ export default {
             return 0;
         }
         
-        const queue = socketQueues.get(socketKey);
+        const queue = socketQueues.get(key);
         if (!queue) {
             return -1;
         }
