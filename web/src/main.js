@@ -13,6 +13,7 @@ import jsReferenceNatives from "../libjs/libjsreference.js";
 import mediaBridgeNatives from "../libjs/libmediabridge.js";
 import midiBridgeNatives from "../libjs/libmidibridge.js";
 import socketBridgeNatives from "../libjs/libsockets.js";
+import uiNatives from "../libjs/libui.js";
 
 const evtQueue = new EventQueue();
 const sp = new URLSearchParams(location.search);
@@ -352,6 +353,7 @@ async function init() {
             ...mediaBridgeNatives,
             ...midiBridgeNatives,
             ...socketBridgeNatives,
+            ...uiNatives,
             async Java_pl_zb3_freej2me_bridge_shell_Shell_setTitle(lib, title) {
                 document.title = title;
             },

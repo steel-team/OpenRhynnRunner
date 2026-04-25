@@ -45,6 +45,12 @@ public class TextField extends Item {
 
 	public void beginInput() {
 		System.out.println("input requested");
+		String value = UiNatives.requestInput();
+		if (value == null) {
+			value = "";
+		}
+
+		text = value;
 	}
 
 	public TextField(String label, String value, int maxSize, int Constraints) {
