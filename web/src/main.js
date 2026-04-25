@@ -317,7 +317,7 @@ async function loadGames() {
 }
 
 async function init() {
-    await loadGames();
+    //await loadGames();
     // clear db, it's broken with openrhynn...
     const databases = await indexedDB.databases(); // Get list of all DBs
     databases.forEach(db => {
@@ -416,6 +416,8 @@ async function init() {
     const lib = await cheerpjRunLibrary(cheerpjWebRoot+"/freej2me-web.jar");
 
     const FreeJ2ME = await lib.org.recompile.freej2me.FreeJ2ME;
+
+    await loadGames();
 
     let args;
 
