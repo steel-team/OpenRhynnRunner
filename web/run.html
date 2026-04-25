@@ -26,7 +26,7 @@
         justify-content: center;
     }
     #display {
-        background-color: white;
+        background-color: black;
         zoom: 1;
         image-rendering: pixelated; /* affects zoom */
         border: 1px solid #141414;
@@ -36,6 +36,7 @@
     }
     #loading {
         font-size: 2em;
+        color: white;
     }
 
     .keypad-part {
@@ -189,7 +190,7 @@
 <body>
     <div id="screen-area">
         <canvas tabindex="0" id="display" style="display: none;"></canvas>
-        <div id="loading">Loading...</div>
+        <div id="loading">Loading (works on CheerpJ)...</div>
     </div>
     <div id="left-keys" class="keypad-part">
         <div class="key-grid left-grid">
