@@ -261,6 +261,9 @@ async function maybeReadCheerpJFileText(path) {
     }
 }
 
+const emptyIcon = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+let defaultSettings = {};
+
 async function loadGames(lib) {
     const apps = [];
 
