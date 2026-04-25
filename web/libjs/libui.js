@@ -1,5 +1,7 @@
 const getTrueHeight = () => {
-    let baseSize = Math.round(window.innerHeight / computeScaleFactor());
+    const factor = computeScaleFactor();
+    let baseSize = Math.round(window.innerHeight / factor);
+    console.log(`scale factor = ${factor}, inner height = ${window.innerHeight}, resulting size = ${baseSize}`);
     return baseSize;
 };
 
