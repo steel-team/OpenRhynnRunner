@@ -32,6 +32,12 @@ const keyRepeatManager = new KeyRepeatManager();
 
 window.evtQueue = evtQueue;
 
+const computeScaleFactor = () => {
+    let baseSize = window.innerHeight;
+    let targetHeight = 320;
+    return baseSize / targetHeight;
+};
+
 function autoscale() {
     if (!scaleSet) return;
 
@@ -62,7 +68,7 @@ function autoscale() {
         scale = scale|0;
     }
 
-    display.style.zoom = scale;
+    display.style.zoom = computeScaleFactor(); //scale;
 }
 
 function setListeners() {
