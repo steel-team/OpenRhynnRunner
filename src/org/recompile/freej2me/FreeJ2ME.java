@@ -22,6 +22,8 @@ package org.recompile.freej2me;
 
 import org.recompile.mobile.*;
 
+import com.steelteam.EmuNatives;
+
 import pl.zb3.freej2me.audio.LibmediaPlayer;
 import pl.zb3.freej2me.bridge.graphics.CanvasGraphics;
 import pl.zb3.freej2me.bridge.media.MediaBridge;
@@ -86,7 +88,7 @@ public class FreeJ2ME {
 		LauncherUtil.moveAppIdToTop(loader.getAppId());
 
 		// we shouldn't strictly require this to exist and depend on the launcher..
-		String appDataPath = "./"+loader.getAppId();
+		String appDataPath = "./" + loader.getAppId();
 
 		config = new Config();
 		config.init(appDataPath);
@@ -106,6 +108,15 @@ public class FreeJ2ME {
 		// this is also due to font statically depending on that
 		lcdWidth = config.getWidth();
 		lcdHeight = config.getHeight();
+		int bWidth = EmuNatives.getWidth(lcdWidth);
+		int bHeight = EmuNatives.getWidth(lcdHeight);
+		if (bWidth > 0) {
+			lcdWidth = bWidth;
+		}
+		if (bHeight > 0) {
+			lcdHeight = bHeight;
+		}
+
 		Mobile.setPlatform(new MobilePlatform(appDataPath, lcdWidth, lcdHeight));
 
 		Font.setFontsSize(config.getFontSize(), lcdWidth, lcdHeight);
@@ -155,7 +166,6 @@ public class FreeJ2ME {
 		Mobile.getPlatform().startEventQueue();
 
 		System.out.println("after starteventqueue");
-
 
 		// JS can communicate with us only using this mechanism
 		Shell.startInputListener(new InputListener() {
@@ -323,6 +333,16 @@ public class FreeJ2ME {
 		}
 		lcdWidth = config.getWidth();
 		lcdHeight = config.getHeight();
+
+		int bWidth = EmuNatives.getWidth(lcdWidth);
+		int bHeight = EmuNatives.getWidth(lcdHeight);
+		if (bWidth > 0) {
+			lcdWidth = bWidth;
+		}
+		if (bHeight > 0) {
+			lcdHeight = bHeight;
+		}
+
 		if (lcdWidth != Mobile.getPlatform().lcdWidth || lcdHeight != Mobile.getPlatform().lcdHeight) {
 			Mobile.getPlatform().resizeLCD(lcdWidth, lcdHeight);
 		}
@@ -339,7 +359,8 @@ public class FreeJ2ME {
 			Mobile.getPlatform().addSystemProperty("com.siemens.OSVersion", "11");
 			Mobile.getPlatform().addSystemProperty("com.siemens.IMEI", "000000000000000");
 
-			// this is monochrome, but newer color games were smart enough not to depend on this property...
+			// this is monochrome, but newer color games were smart enough not to depend on
+			// this property...
 			Mobile.getPlatform().addSystemProperty("microedition.platform", "SL45i");
 		}
 	}
