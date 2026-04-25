@@ -24,9 +24,7 @@ import pl.zb3.freej2me.bridge.shell.KeyEvent;
 import java.util.ArrayList;
 import pl.zb3.freej2me.bridge.graphics.Rectangle;
 
-
-public class Form extends Screen
-{
+public class Form extends Screen {
 
 	public ItemStateListener listener;
 
@@ -39,30 +37,37 @@ public class Form extends Screen
 	int clientHeight;
 	int scrollHeight = 0;
 
-	public Form(String title)
-	{
+	public Form(String title) {
 		setTitle(title);
 	}
 
-	public Form(String title, Item[] itemarray)
-	{
+	public Form(String title, Item[] itemarray) {
 		setTitle(title);
 
-		for (int i=0; i<itemarray.length; i++)
-		{
+		for (int i = 0; i < itemarray.length; i++) {
 			doInsert(i, itemarray[i], false);
 		}
 	}
 
-	public int append(Image img) { return doInsert(items.size(), new ImageItem("",img,0,""), false); }
+	public int append(Image img) {
+		return doInsert(items.size(), new ImageItem("", img, 0, ""), false);
+	}
 
-	public int append(Item item) { return doInsert(items.size(), item, false); }
+	public int append(Item item) {
+		return doInsert(items.size(), item, false);
+	}
 
-	public int append(String str) { return doInsert(items.size(), new StringItem("", str), false); }
+	public int append(String str) {
+		return doInsert(items.size(), new StringItem("", str), false);
+	}
 
-	public void insert(int itemNum, Item item) { doInsert(items.size(), item, false);  }
+	public void insert(int itemNum, Item item) {
+		doInsert(items.size(), item, false);
+	}
 
-	public void set(int itemNum, Item item) { doInsert(items.size(), item, true);  }
+	public void set(int itemNum, Item item) {
+		doInsert(items.size(), item, true);
+	}
 
 	int doInsert(int index, Item item, boolean replace) {
 		if (replace && index < items.size()) {
@@ -91,7 +96,7 @@ public class Form extends Screen
 		items.remove(itemNum);
 		needsLayout = true;
 		if (focusedItem >= items.size() && !items.isEmpty()) {
-			focusedItem = items.size()-1;
+			focusedItem = items.size() - 1;
 			focusedItemNeedsTraverse = true;
 		} else if (items.isEmpty()) {
 			focusedItem = 0;
@@ -101,7 +106,7 @@ public class Form extends Screen
 	}
 
 	public void deleteAll() {
-		for (Item item: items) {
+		for (Item item : items) {
 			item.traverseOut();
 			item.setOwner(null);
 		}
@@ -112,13 +117,21 @@ public class Form extends Screen
 		_invalidate();
 	}
 
-	public Item get(int itemNum) { return items.get(itemNum); }
+	public Item get(int itemNum) {
+		return items.get(itemNum);
+	}
 
-	public int getHeight() { return height; }
+	public int getHeight() {
+		return height;
+	}
 
-	public int getWidth() { return width; }
+	public int getWidth() {
+		return width;
+	}
 
-	public void setItemStateListener(ItemStateListener iListener) { listener = iListener; }
+	public void setItemStateListener(ItemStateListener iListener) {
+		listener = iListener;
+	}
 
 	protected void itemStateChanged(Item item) {
 		if (listener != null) {
@@ -126,15 +139,47 @@ public class Form extends Screen
 		}
 	}
 
-	public int size() { return items.size(); }
+	public int size() {
+		return items.size();
+	}
 
 	/*
-		Draw form, handle input
-	*/
+	 * Draw form, handle input
+	 */
 
-	public boolean screenKeyPressed(KeyEvent keyEvent)
-	{
-		if(items.size()<1 || needsLayout || focusedItemNeedsTraverse) { return false; }
+	public int Check = 48;
+
+	@Override
+	public void pointerPressed(int x, int y) {
+		int DISPLAYWIDTH = getWidth();
+		int DISPLAYHEIGHT = getHeight();
+
+		int comButtonWidth = width / 4;
+		int comButtonHeight = (int) (height * 0.15);
+
+		if (x > DISPLAYWIDTH / 2 - this.Check && x < DISPLAYWIDTH / 2 + this.Check && y > DISPLAYHEIGHT / 2 - this.Check
+				&& y < DISPLAYHEIGHT / 2 + this.Check) {
+			// open element enter
+			for (Item itm : items) {
+				if (itm instanceof TextField tf) {
+					tf.beginInput();
+					break;
+				}
+			}
+		}
+
+		if (x >= 0 && x <= comButtonWidth && y >= DISPLAYHEIGHT - comButtonHeight) {
+			// keycode -6
+			this.keyPressed(-6);
+			this.keyReleased(-6);
+			// toReleaseKey = -6;
+		}
+	}
+
+	public boolean screenKeyPressed(KeyEvent keyEvent) {
+		if (items.size() < 1 || needsLayout || focusedItemNeedsTraverse) {
+			return false;
+		}
 
 		boolean handled = true, shouldInvalidate = false;
 
@@ -147,22 +192,25 @@ public class Form extends Screen
 			if ((keyEvent.normalizedCode == Mobile.NOKIA_UP || keyEvent.normalizedCode == Mobile.NOKIA_DOWN)) {
 				// first see if internal traversal should be attempted
 				boolean traversed = false;
-				traversed = doTraverseItem(focusedItem, keyEvent.normalizedCode == Mobile.NOKIA_UP ? Canvas.UP : Canvas.DOWN);
+				traversed = doTraverseItem(focusedItem,
+						keyEvent.normalizedCode == Mobile.NOKIA_UP ? Canvas.UP : Canvas.DOWN);
 
-				// we assume that traversed returning false for a limit doesn't imply traverseOut yet
+				// we assume that traversed returning false for a limit doesn't imply
+				// traverseOut yet
 				// and if we've trafersed internally, there's nothing left
 
 				if (!traversed) {
 					// check if we should scroll
 
 					int reasonablePadding = 10;
-					int scrollAmount = clientHeight/4;
+					int scrollAmount = clientHeight / 4;
 
-					Rectangle reasonableViewport = new Rectangle(0, scrollY+reasonablePadding, width, clientHeight-reasonablePadding);
+					Rectangle reasonableViewport = new Rectangle(0, scrollY + reasonablePadding, width,
+							clientHeight - reasonablePadding);
 					int traverseDir = 0;
 
 					if (keyEvent.normalizedCode == Mobile.NOKIA_UP) {
-						if (focusedItem > 0 && itemBounds[focusedItem-1].intersects(reasonableViewport)) {
+						if (focusedItem > 0 && itemBounds[focusedItem - 1].intersects(reasonableViewport)) {
 							// focusedItem--;
 							traverseDir = -1;
 						} else if (scrollY > 0) {
@@ -172,7 +220,8 @@ public class Form extends Screen
 					} else {
 						int maxScroll = scrollHeight - clientHeight;
 
-						if (focusedItem < items.size()-1 && itemBounds[focusedItem+1].intersects(reasonableViewport)) {
+						if (focusedItem < items.size() - 1
+								&& itemBounds[focusedItem + 1].intersects(reasonableViewport)) {
 							// focusedItem++;
 							traverseDir = 1;
 						} else if (scrollY < maxScroll) {
@@ -212,8 +261,7 @@ public class Form extends Screen
 		return handled;
 	}
 
-	private void computeLayout(CanvasGraphics gc, int height)
-	{
+	private void computeLayout(CanvasGraphics gc, int height) {
 		this.clientHeight = height;
 		scrollY = 0;
 		focusedItem = 0;
@@ -229,14 +277,10 @@ public class Form extends Screen
 
 		int itemX = padding;
 
+		itemContentWidth = width - scrollbarWidth - 2 * padding;
 
-		itemContentWidth = width-scrollbarWidth-2*padding;
-
-
-		for (int i=0; i<items.size(); i++)
-		{
-			if (i > 0)
-			{
+		for (int i = 0; i < items.size(); i++) {
+			if (i > 0) {
 				currentY += spaceBetweenItems;
 			}
 			int itemHeight = getItemHeight(gc, items.get(i), itemContentWidth);
@@ -249,8 +293,7 @@ public class Form extends Screen
 		scrollHeight = currentY;
 	}
 
-	private int getItemHeight(CanvasGraphics gc, Item item, int width)
-	{
+	private int getItemHeight(CanvasGraphics gc, Item item, int width) {
 		int height = item.getContentHeight(width) + item.getLabelHeight(width);
 		return height;
 	}
@@ -265,10 +308,12 @@ public class Form extends Screen
 	}
 
 	protected void focusItem(Item item) {
-		if (needsLayout) return; // hmm
+		if (needsLayout)
+			return; // hmm
 
 		int index = items.indexOf(item); // this might not be by reference
-		if (index == -1) return;
+		if (index == -1)
+			return;
 
 		Item previousItem = getFocusedItem();
 		if (previousItem != null && previousItem != item) {
@@ -298,7 +343,9 @@ public class Form extends Screen
 			int topInvisible = Math.max(0, scrollY - y);
 			int bottomInvisible = Math.max(0, (y + height) - (scrollY + clientHeight));
 
-			if (topInvisible == 0 && bottomInvisible == 0) { return; }
+			if (topInvisible == 0 && bottomInvisible == 0) {
+				return;
+			}
 
 			if (topInvisible > bottomInvisible) {
 				scrollY -= topInvisible;
@@ -334,7 +381,8 @@ public class Form extends Screen
 		int visRectStart = Math.max(scrollY, itemStartY);
 		int visRectEnd = Math.min(scrollY + clientHeight, itemBounds[itemIdx].y + itemBounds[itemIdx].height);
 
-		int[] visRect = new int[]{0, visRectStart - itemStartY, itemBounds[itemIdx].width,  Math.max(0, visRectEnd - visRectStart)};
+		int[] visRect = new int[] { 0, visRectStart - itemStartY, itemBounds[itemIdx].width,
+				Math.max(0, visRectEnd - visRectStart) };
 
 		boolean continueTraversing = item.traverse(dir, itemBounds[itemIdx].width, clientHeight, visRect);
 
@@ -345,13 +393,10 @@ public class Form extends Screen
 		return continueTraversing;
 	}
 
-
-	public String renderScreen(int x, int y, int width, int height)
-	{
+	public String renderScreen(int x, int y, int width, int height) {
 		String ret = null;
 
-		if (needsLayout)
-		{
+		if (needsLayout) {
 			computeLayout(gc, height);
 			needsLayout = false;
 		}
@@ -364,24 +409,21 @@ public class Form extends Screen
 			doTraverseItem(focusedItem, CustomItem.NONE);
 		}
 
-		if(items.size()>0)
-		{
+		if (items.size() > 0) {
 			int scrollbarWidth = 4;
 
 			Rectangle viewport = new Rectangle(0, scrollY, width, height);
 
-			for (int t=0;t<items.size();t++)
-			{
+			for (int t = 0; t < items.size(); t++) {
 				Item item = items.get(t);
 
 				if (!viewport.intersects(itemBounds[t]))
-				continue;
+					continue;
 
 				int thisX = x + itemBounds[t].x;
 				int thisY = y + itemBounds[t].y - scrollY;
 
-				if (t == focusedItem && items.size() > 1)
-				{
+				if (t == focusedItem && items.size() > 1) {
 					gc.setColor(150, 150, 150);
 					// drawRect needs size - 1
 					gc.drawRect(thisX - 3, thisY - 3, itemBounds[t].width + 6 - 1, itemBounds[t].height + 6 - 1);
@@ -402,19 +444,18 @@ public class Form extends Screen
 				thisY += itemHeight;
 			}
 
-			double fact = (double)height/scrollHeight;
-			int yscrollStart = (int)Math.round(scrollY * fact);
-			int yscrollHeight = (int)Math.min(height, Math.round(height * fact));
+			double fact = (double) height / scrollHeight;
+			int yscrollStart = (int) Math.round(scrollY * fact);
+			int yscrollHeight = (int) Math.min(height, Math.round(height * fact));
 
-			if (height < scrollHeight)
-			{
+			if (height < scrollHeight) {
 				gc.setColor(150, 150, 150);
-				gc.fillRect(x + width - scrollbarWidth, y+yscrollStart, scrollbarWidth, yscrollHeight);
+				gc.fillRect(x + width - scrollbarWidth, y + yscrollStart, scrollbarWidth, yscrollHeight);
 			}
 
 			gc.reset();
 
-			ret = (focusedItem+1)+" of "+items.size();
+			ret = (focusedItem + 1) + " of " + items.size();
 		}
 
 		return ret;

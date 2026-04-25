@@ -19,8 +19,7 @@ package javax.microedition.lcdui;
 import pl.zb3.freej2me.bridge.graphics.CanvasGraphics;
 import pl.zb3.freej2me.bridge.shell.KeyEvent;
 
-public class TextField extends Item
-{
+public class TextField extends Item {
 	public static final int ANY = 0;
 	public static final int CONSTRAINT_MASK = 0xFFFF;
 	public static final int DECIMAL = 5;
@@ -35,7 +34,6 @@ public class TextField extends Item
 	public static final int UNEDITABLE = 0x20000;
 	public static final int URL = 4;
 
-
 	private String text;
 	private int max;
 	private int constraints;
@@ -45,8 +43,11 @@ public class TextField extends Item
 	private int margin;
 	private boolean hilighted;
 
-	public TextField(String label, String value, int maxSize, int Constraints)
-	{
+	public void beginInput() {
+		System.out.println("input requested");
+	}
+
+	public TextField(String label, String value, int maxSize, int Constraints) {
 		setLabel(label);
 		text = value == null ? "" : value;
 		max = maxSize;
@@ -57,34 +58,38 @@ public class TextField extends Item
 		margin = lineHeight / 5;
 	}
 
-	void delete(int offset, int length)
-	{
-		text = text.substring(0, offset) + text.substring(offset+length);
+	void delete(int offset, int length) {
+		text = text.substring(0, offset) + text.substring(offset + length);
 		if (caretPosition > text.length()) {
 			caretPosition = text.length();
 		}
 		_invalidateContents();
 	}
 
-	public int getCaretPosition() { return caretPosition; }
+	public int getCaretPosition() {
+		return caretPosition;
+	}
 
-	public int getChars(char[] data)
-	{
-		for(int i=0; i<text.length(); i++)
-		{
+	public int getChars(char[] data) {
+		for (int i = 0; i < text.length(); i++) {
 			data[i] = text.charAt(i);
 		}
 		return text.length();
 	}
 
-	public int getConstraints() { return constraints; }
+	public int getConstraints() {
+		return constraints;
+	}
 
-	public int getMaxSize() { return max; }
+	public int getMaxSize() {
+		return max;
+	}
 
-	public String getString() { return text; }
+	public String getString() {
+		return text;
+	}
 
-	public void insert(char[] data, int offset, int length, int position)
-	{
+	public void insert(char[] data, int offset, int length, int position) {
 		StringBuilder out = new StringBuilder();
 		out.append(text, 0, position);
 		out.append(data, offset, length);
@@ -94,8 +99,7 @@ public class TextField extends Item
 		_invalidateContents();
 	}
 
-	public void insert(String src, int position)
-	{
+	public void insert(String src, int position) {
 		StringBuilder out = new StringBuilder();
 		out.append(text, 0, position);
 		out.append(src);
@@ -105,8 +109,7 @@ public class TextField extends Item
 		_invalidateContents();
 	}
 
-	public void setChars(char[] data, int offset, int length)
-	{
+	public void setChars(char[] data, int offset, int length) {
 		if (data == null) {
 			setString("");
 			return;
@@ -124,9 +127,14 @@ public class TextField extends Item
 		_invalidateContents(); // because it might change arrows visibility
 	}
 
-	public void setInitialInputMode(String characterSubset) { mode = characterSubset; }
+	public void setInitialInputMode(String characterSubset) {
+		mode = characterSubset;
+	}
 
-	public int setMaxSize(int maxSize) { max = maxSize; return max; }
+	public int setMaxSize(int maxSize) {
+		max = maxSize;
+		return max;
+	}
 
 	public void setString(String value) {
 		if (value == null) {
@@ -138,11 +146,12 @@ public class TextField extends Item
 		_invalidateContents();
 	}
 
-	public int size() { return text.length(); }
-
+	public int size() {
+		return text.length();
+	}
 
 	protected int getContentHeight(int width) {
-		return lineHeight + padding*2 + 2*margin; // padding
+		return lineHeight + padding * 2 + 2 * margin; // padding
 	}
 
 	protected boolean keyPressed(KeyEvent e) {
@@ -150,11 +159,11 @@ public class TextField extends Item
 		int code = e.code;
 
 		if (code == KeyEvent.VK_BACK_SPACE && caretPosition > 0) {
-			text = text.substring(0, caretPosition-1) + text.substring(caretPosition);
+			text = text.substring(0, caretPosition - 1) + text.substring(caretPosition);
 			caretPosition--;
 			changed = true;
 		} else if (code == KeyEvent.VK_DELETE && caretPosition < text.length()) {
-			text = text.substring(0, caretPosition) + text.substring(caretPosition+1);
+			text = text.substring(0, caretPosition) + text.substring(caretPosition + 1);
 			changed = true;
 		} else if (constraints != NUMERIC && code == KeyEvent.VK_LEFT && caretPosition > 0) {
 			caretPosition--;
@@ -165,7 +174,8 @@ public class TextField extends Item
 
 			try {
 				value = Integer.parseInt(text);
-			} catch(Exception exc) {}
+			} catch (Exception exc) {
+			}
 
 			value--;
 
@@ -176,7 +186,8 @@ public class TextField extends Item
 
 			try {
 				value = Integer.parseInt(text);
-			} catch(Exception exc) {}
+			} catch (Exception exc) {
+			}
 
 			value++;
 
@@ -188,7 +199,8 @@ public class TextField extends Item
 
 			if (constraints == NUMERIC && !((chr >= '0' && chr <= '9') || chr == '-')) {
 				ok = false;
-			} else if (constraints == DECIMAL && !((chr >= '0' && chr <= '9') || chr == '-' || chr == '.' || chr == ',')) {
+			} else if (constraints == DECIMAL
+					&& !((chr >= '0' && chr <= '9') || chr == '-' || chr == '.' || chr == ',')) {
 				ok = false;
 			}
 
@@ -220,24 +232,23 @@ public class TextField extends Item
 		int arrowSpacing = 0;
 
 		if (constraints == NUMERIC) {
-			arrowSpacing = _drawArrow(gc, -1,  true, 0, margin+padding, width, lineHeight);
+			arrowSpacing = _drawArrow(gc, -1, true, 0, margin + padding, width, lineHeight);
 		}
 
 		gc.setColor(0x000000);
-		gc.drawRect(arrowSpacing+margin, margin, width-2*arrowSpacing-2*margin, lineHeight+2*padding);
+		gc.drawRect(arrowSpacing + margin, margin, width - 2 * arrowSpacing - 2 * margin, lineHeight + 2 * padding);
 
-		gc.drawString(text, arrowSpacing+margin+padding, margin+padding, 0);
+		gc.drawString(text, arrowSpacing + margin + padding, margin + padding, 0);
 
 		int cwidth = itemFont.stringWidth(text.substring(0, caretPosition));
 
 		if (hilighted) {
-			gc.drawRect(arrowSpacing+margin+padding+cwidth, margin+padding, 0, lineHeight);
+			gc.drawRect(arrowSpacing + margin + padding + cwidth, margin + padding, 0, lineHeight);
 		}
 
 		if (constraints == NUMERIC) {
-			_drawArrow(gc, 1,  true, 0, margin+padding, width, lineHeight);
+			_drawArrow(gc, 1, true, 0, margin + padding, width, lineHeight);
 		}
-
 
 		gc.translate(-x, -y);
 	}
