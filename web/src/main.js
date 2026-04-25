@@ -46,6 +46,8 @@ function autoscaleThrottled() {
 function autoscale() {
     if (!scaleSet) return;
 
+    console.log("autoscale called");
+
     let screenWidth = window.innerWidth;
     let screenHeight = window.innerHeight;
 
@@ -377,6 +379,7 @@ async function init() {
                 return screenCtx;
             },
             async Java_pl_zb3_freej2me_bridge_shell_Shell_setCanvasSize(lib, width, height) {
+                console.log("set canvas size called");
                 if (!scaleSet) {
                     document.getElementById('loading').hidden = true;
                     display.style.display = '';
