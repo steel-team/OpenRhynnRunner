@@ -171,8 +171,12 @@ public class Form extends Screen {
 
 		if (x >= 0 && x <= comButtonWidth && y >= DISPLAYHEIGHT - comButtonHeight) {
 			// keycode -6
-			this.keyPressed(-6);
-			this.keyReleased(-6);
+			for (Item itm : items) {
+				if (itm instanceof StringItem) {
+					itm.commandListener.commandAction(getItemCommand(), itm);
+					break;
+				}
+			}
 			// toReleaseKey = -6;
 		}
 	}
