@@ -261,7 +261,7 @@ async function maybeReadCheerpJFileText(path) {
     }
 }
 
-async function loadGames() {
+async function loadGames(lib) {
     const apps = [];
 
     let installedAppsBlob = await cjFileBlob("/files/apps.list");
@@ -417,7 +417,7 @@ async function init() {
 
     const FreeJ2ME = await lib.org.recompile.freej2me.FreeJ2ME;
 
-    await loadGames();
+    await loadGames(lib);
 
     let args;
 
