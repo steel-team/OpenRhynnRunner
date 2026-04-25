@@ -232,7 +232,92 @@ async function ensureAppInstalled(lib, appId) {
     }
 }
 
+function readToKv(txt, kv) {
+    for (const line of txt.trim().split("\n")) {
+        const parts = line.split(/\s*:\s*/);
+        if (parts.length == 2) {
+            kv[parts[0]] = parts[1];
+        }
+    }
+}
+
+async function getDataUrlFromBlob(blob) {
+    const reader = new FileReader();
+
+    const promise = new Promise((r) => {
+        reader.onload = function () {
+            r(reader.result);
+        };
+    });
+
+    reader.readAsDataURL(blob);
+    return await promise;
+}
+
+async function maybeReadCheerpJFileText(path) {
+    const blob = await cjFileBlob(path);
+    if (blob) {
+        return await blob.text();
+    }
+}
+
+async function loadGames() {
+    const apps = [];
+
+    let installedAppsBlob = await cjFileBlob("/files/apps.list");
+    if (!installedAppsBlob) {
+        const res = await fetch("init.zip");
+        const ab = await res.arrayBuffer();
+        const launcherUtil = await lib.pl.zb3.freej2me.launcher.LauncherUtil;
+        await launcherUtil.importData(new Int8Array(ab));
+
+        installedAppsBlob = await cjFileBlob("/files/apps.list");
+    }
+
+    if (installedAppsBlob) {
+        const installedIds = (await installedAppsBlob.text()).trim().split("\n");
+
+        for (const appId of installedIds) {
+            const napp = {
+                appId,
+                name: appId,
+                icon: emptyIcon,
+                settings: { ...defaultSettings },
+                appProperties: {},
+                systemProperties: {},
+            };
+
+            const name = await maybeReadCheerpJFileText("/files/" + appId + "/name");
+            if (name) napp.name = name;
+
+            const iconBlob = await cjFileBlob("/files/" + appId + "/icon");
+            if (iconBlob) {
+                const dataUrl = await getDataUrlFromBlob(iconBlob);
+                if (dataUrl) {
+                    napp.icon = dataUrl;
+                }
+            }
+
+            for (const [fname, keyName] of [
+                ["/files/" + appId + "/config/settings.conf", "settings"],
+                ["/files/" + appId + "/config/appproperties.conf", "appProperties"],
+                ["/files/" + appId + "/config/systemproperties.conf", "systemProperties"],
+            ]) {
+                const content = await maybeReadCheerpJFileText(fname);
+                if (content) {
+                    readToKv(content, napp[keyName]);
+                }
+            }
+
+            apps.push(napp);
+        }
+    }
+
+    return apps;
+}
+
 async function init() {
+    await loadGames();
     // clear db, it's broken with openrhynn...
     const databases = await indexedDB.databases(); // Get list of all DBs
     databases.forEach(db => {
