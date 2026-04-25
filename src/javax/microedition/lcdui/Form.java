@@ -161,7 +161,8 @@ public class Form extends Screen {
 				&& y < DISPLAYHEIGHT / 2 + this.Check) {
 			// open element enter
 			for (Item itm : items) {
-				if (itm instanceof TextField tf) {
+				if (itm instanceof TextField) {
+					TextField tf = (TextField) itm;
 					tf.beginInput();
 					break;
 				}
