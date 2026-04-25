@@ -109,7 +109,7 @@ public class FreeJ2ME {
 		lcdWidth = config.getWidth();
 		lcdHeight = config.getHeight();
 		int bWidth = EmuNatives.getWidth(lcdWidth);
-		int bHeight = EmuNatives.getWidth(lcdHeight);
+		int bHeight = EmuNatives.getHeight(lcdHeight);
 		if (bWidth > 0) {
 			lcdWidth = bWidth;
 		}
@@ -335,7 +335,7 @@ public class FreeJ2ME {
 		lcdHeight = config.getHeight();
 
 		int bWidth = EmuNatives.getWidth(lcdWidth);
-		int bHeight = EmuNatives.getWidth(lcdHeight);
+		int bHeight = EmuNatives.getHeight(lcdHeight);
 		if (bWidth > 0) {
 			lcdWidth = bWidth;
 		}
