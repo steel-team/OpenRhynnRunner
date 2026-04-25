@@ -38,6 +38,11 @@ const computeScaleFactor = () => {
     return baseSize / targetHeight;
 };
 
+function autoscaleThrottled() {
+    // comment to prevent bugs when on screen keyboard opened
+    //setTimeout(autoscale, 1000);
+}
+
 function autoscale() {
     if (!scaleSet) return;
 
@@ -205,8 +210,8 @@ function setListeners() {
         setTimeout(() => display.focus(), 10);
         ;
     });
-
-    window.addEventListener('resize', autoscale);
+    
+    window.addEventListener('resize', autoscaleThrottled);
 
     initKbdListeners();
 }
