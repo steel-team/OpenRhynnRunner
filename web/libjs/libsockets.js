@@ -8,7 +8,8 @@ export default {
         if(host.startsWith("-")) return -1;
         if(host.startsWith("true")) return -1;
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        const uri = `${protocol}://${host}:8181/ws`;
+        const nport = protocol == 'ws' ? '8181' : '443';
+        const uri = `${protocol}://${host}:${nport}/ws`;
         //const uri = "ws://server2.openrhynn.net:8181/ws"; // force specific server due to OR client bug.
         const socketKey = `${host}:${port}`;
         try {
